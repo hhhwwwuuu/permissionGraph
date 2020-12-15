@@ -1,14 +1,16 @@
 from itertools import combinations
 import networkx as nx
 import pandas as pd
+import numpy as np
 
-
+perList = ['Calendar', 'Contacts', 'Camera', 'Location', 'Microphone', 'Phone', 'SMS', 'Call Log', 'Storage', 'Sensors']
 
 def dataReader():
     data = pd.read_csv('data/permission_preprocessed.csv', encoding= 'utf-8')
 
     def getPermissions(data):
-        return data.columns.values.tolist()[2:]
+        perList = data.columns.values.tolist()[2:]
+        return perList
 
     def getCategory(data):
         return list(set(data['category'].values.tolist()))
@@ -56,3 +58,16 @@ def buildGraph(category, permissions, data):
     graph = connectEdge(graph)
 
     return graph
+
+def adjacencyGraph(graph):
+    adjList = [[node, n_neigh] for node, n_neigh in graph.adjacency()]
+    print(adjList)
+
+    adj_matrix = np.zeros(shape=[len(perList), len(perList)]).astype(np.int32)
+
+    for node, neighbors in adjList:
+        row = perList.index(node)
+        for key, val in neighbors.items():
+            adj_matrix[row, perList.index(key)] = val['weight']
+    print(adj_matrix)
+    return adj_matrix
