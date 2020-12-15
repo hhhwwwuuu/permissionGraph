@@ -19,7 +19,13 @@ def dataReader():
 
 
 def buildGraph(category, permissions, data):
-
+    '''
+    generate the graph of permission relation based on existing data for each genre
+    :param category:
+    :param permissions:
+    :param data:
+    :return:
+    '''
     ### connecting the relations of permissions based on apps
     def connectEdge(graph):
         for index, row in data.iterrows():
@@ -59,15 +65,38 @@ def buildGraph(category, permissions, data):
 
     return graph
 
-def adjacencyGraph(graph):
-    adjList = [[node, n_neigh] for node, n_neigh in graph.adjacency()]
-    print(adjList)
+def weightMatrix(graph, mtype = 'weight'):
+    '''
+    generate the weight matrix or adjacency matrix for the graph
+    :param graph: the graph
+    :param mtype: matrix type (only 'weight' and 'adjacency'). Default is weight matrix
+    :return: generated matrix
+    '''
+
+    def adjacencyNodes(graph):
+        adjList = [[node, n_neigh] for node, n_neigh in graph.adjacency()]
+        return adjList
+
+    adjList = adjacencyNodes(graph)
 
     adj_matrix = np.zeros(shape=[len(perList), len(perList)]).astype(np.int32)
 
     for node, neighbors in adjList:
         row = perList.index(node)
         for key, val in neighbors.items():
-            adj_matrix[row, perList.index(key)] = val['weight']
+            adj_matrix[row, perList.index(key)] = val['weight'] if mtype == 'weight' else 1
     print(adj_matrix)
     return adj_matrix
+
+def degreeMatrix(graph):
+
+    degree_matrix = np.zeros(shape=[len(perList), len(perList)]).astype(np.int32)
+    for index in range(len(perList)):
+        degree_matrix[index, index] = graph.degree[perList[index]]
+    #print(degree_matrix)
+    return degree_matrix
+
+
+
+
+

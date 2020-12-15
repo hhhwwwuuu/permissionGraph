@@ -27,7 +27,8 @@ if __name__ == '__main__':
         plt.show()
         pbar.update(1)
         #print(graph.nodes.data())
-        adj_matrix = bg.adjacencyGraph(graph)
+        adj_matrix = bg.weightMatrix(graph, mtype='adjacency')
+        degree_matrix = bg.degreeMatrix(graph)
         break
     pbar.close()
 
