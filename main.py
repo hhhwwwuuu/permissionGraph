@@ -9,7 +9,7 @@ import networkx as nx
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import buildGraph as bg
-
+from utils import normalization, filterRarePermission
 
 
 
@@ -27,8 +27,14 @@ if __name__ == '__main__':
         plt.show()
         pbar.update(1)
         #print(graph.nodes.data())
-        adj_matrix = bg.weightMatrix(graph, mtype='adjacency')
+        adj_matrix = bg.weightMatrix(graph, mtype='weight')
+        print('-------------------Weight matrix-------------------')
+        print(adj_matrix)
         degree_matrix = bg.degreeMatrix(graph)
+        print('-------------------Degree matrix-------------------')
+        print(degree_matrix)
+        print('-------------------Normalized matrix-------------------')
+        print(normalization(adj_matrix))
         break
     pbar.close()
 
