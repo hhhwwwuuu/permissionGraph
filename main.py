@@ -9,7 +9,7 @@ import networkx as nx
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import buildGraph as bg
-from utils import normalization, filterRarePermission
+from utils import normalization, searchCommon, freqPermission, weightProportion
 
 
 
@@ -21,8 +21,8 @@ if __name__ == '__main__':
     print("Starting graph generation...")
     pbar = tqdm(total=len(categories))
     for category in categories:
-        print("Creating graph for permission {}".format(category))
-        graph = bg.buildGraph(category, permissions, data.groupby('category').get_group(category))
+        print("Creating graph for permission {}".format('Art & Design'))
+        graph = bg.buildGraph('Art & Design', permissions, data.groupby('category').get_group('Art & Design'))
         nx.draw(graph, with_labels=True, node_size=1000, pos= nx.shell_layout(graph))
         plt.show()
         pbar.update(1)
@@ -35,6 +35,7 @@ if __name__ == '__main__':
         print(degree_matrix)
         print('-------------------Normalized matrix-------------------')
         print(normalization(adj_matrix))
+        print(searchCommon(graph))
         break
     pbar.close()
 

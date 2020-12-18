@@ -86,7 +86,7 @@ def weightMatrix(graph, mtype = 'weight'):
         for key, val in neighbors.items():
             adj_matrix[row, perList.index(key)] = val['weight'] if mtype == 'weight' else 1
     #print(adj_matrix)
-    return adj_matrix
+    return np.array(adj_matrix)
 
 def degreeMatrix(graph):
 
@@ -94,7 +94,7 @@ def degreeMatrix(graph):
     for index in range(len(perList)):
         degree_matrix[index, index] = graph.degree[perList[index]]
     #print(degree_matrix)
-    return degree_matrix
+    return np.array(degree_matrix)
 
 
 

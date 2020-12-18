@@ -1,5 +1,8 @@
 import numpy as np
 import pandas as pd
+import buildGraph as bg
+import networkx as nx
+
 
 def normalization(matrix):
     matrix = np.array(matrix)
@@ -19,6 +22,91 @@ def filterRarePermission():
                 else:
                     rarePermissions[row['category']] = [permissions[i]]
     return rarePermissions
+
+
+def freqPermission(category, permission):
+    data = pd.read_csv('data/permission_frequency_on_category.csv', encoding='utf-8')
+    return data.loc[data.category == category, permission][0] / data.loc[data.category == category, 'Count'][0]
+
+
+def weightProportion(src, dst, graph):
+    weightMax = np.max(bg.weightMatrix(graph, mtype='weight'))
+    return graph.edges[src,dst]['weight'] / weightMax
+
+
+
+def searchCommon(graph):
+    '''
+
+    :param graph:
+    :return: common permissions
+    '''
+
+
+    # generate the assoicated matrix
+    adj_matrix = bg.weightMatrix(graph, mtype='adjacency') + np.eye(len(bg.perList))
+    weight_matrix = bg.weightMatrix(graph, mtype='weight')
+    dg_matrix = bg.degreeMatrix(graph)
+
+    # check the optimal start node
+
+    # pick the nodes with large degree & high request frequency
+    # 获取度最大 且 请求次数最多的permissions集
+    row, _ = np.where(dg_matrix == np.max(dg_matrix))
+    maxDegree = np.array([graph.nodes[bg.perList[i]]['count'] for i in row])
+    roots = [bg.perList[i] for i in range(len(bg.perList)) if graph.nodes[bg.perList[i]]['count'] == np.max(maxDegree)]
+    #print(roots)
+
+    '''
+    从roots中的一个节点开始BFS
+    寻找common permissions的组合
+    '''
+    result = []
+    per = ['Calendar', 'Contacts', 'Camera', 'Location', 'Microphone', 'Phone', 'SMS', 'Call Log', 'Storage', 'Sensors']
+    for root in roots:
+        result.append(DFS(root,per, graph))
+    return result
+
+def DFS(root, permissions, graph):
+    # sort the neighbor by degree of node and weight of edges
+    def sortNeighbor(root, nodes):
+        results = {}
+        for node in nodes:
+            if node in permissions:
+                results[node] = {'degree': graph.degree[root],
+                                 'weight': graph.edges[root, node]['weight'],
+                                 'count': graph.nodes[node]['count']}
+
+        results = sorted(results.items(), key=lambda x: (x[1]['count'], x[1]['weight'], x[1]['degree']), reverse=True)
+        return results
+
+
+    common = []
+    common.append(root)
+
+    permissions.remove(root)
+
+    nodes = [u for u,_ in nx.bfs_predecessors(graph, source=root, depth_limit=1)]
+    #print(nodes)
+    neighbors = sortNeighbor(root, nodes)
+    #print(neighbors)
+    '''
+    判断排序后的第一个是否满足要求，
+    若满足，选取该点作为common，
+    否则，结束
+    '''
+    #print(neighbors[0][0])
+    # print(permissions)
+    # print(neighbors[0][0])
+    if freqPermission(graph.graph['name'], neighbors[0][0]) < 0.05 or weightProportion(root, neighbors[0][0], graph) < 0.2:
+        return []
+    elif neighbors[0][0] in permissions:
+        common.extend(DFS(neighbors[0][0], permissions, graph))
+        return common
+    else:
+        return []
+
+
 
 
 
