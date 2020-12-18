@@ -64,21 +64,21 @@ def searchCommon(graph):
     result = []
     per = ['Calendar', 'Contacts', 'Camera', 'Location', 'Microphone', 'Phone', 'SMS', 'Call Log', 'Storage', 'Sensors']
     for root in roots:
-        result.append(DFS(root,per, graph))
+        result.append(BFS(root,per, graph))
     return result
 
 def DFS(root, permissions, graph):
-    # sort the neighbor by degree of node and weight of edges
-    def sortNeighbor(root, nodes):
-        results = {}
-        for node in nodes:
-            if node in permissions:
-                results[node] = {'degree': graph.degree[root],
-                                 'weight': graph.edges[root, node]['weight'],
-                                 'count': graph.nodes[node]['count']}
-
-        results = sorted(results.items(), key=lambda x: (x[1]['count'], x[1]['weight'], x[1]['degree']), reverse=True)
-        return results
+    # # sort the neighbor by degree of node and weight of edges
+    # def sortNeighbor(root, nodes):
+    #     results = {}
+    #     for node in nodes:
+    #         if node in permissions:
+    #             results[node] = {'degree': graph.degree[root],
+    #                              'weight': graph.edges[root, node]['weight'],
+    #                              'count': graph.nodes[node]['count']}
+    #
+    #     results = sorted(results.items(), key=lambda x: (x[1]['count'], x[1]['weight'], x[1]['degree']), reverse=True)
+    #     return results
 
 
     common = []
@@ -88,23 +88,70 @@ def DFS(root, permissions, graph):
 
     nodes = [u for u,_ in nx.bfs_predecessors(graph, source=root, depth_limit=1)]
     #print(nodes)
-    neighbors = sortNeighbor(root, nodes)
+    neighbors = sortNeighbor(root, nodes,permissions, graph)
     #print(neighbors)
     '''
     判断排序后的第一个是否满足要求，
     若满足，选取该点作为common，
     否则，结束
     '''
-    #print(neighbors[0][0])
-    # print(permissions)
-    # print(neighbors[0][0])
     if freqPermission(graph.graph['name'], neighbors[0][0]) < 0.05 or weightProportion(root, neighbors[0][0], graph) < 0.2:
-        return []
+        return common
     elif neighbors[0][0] in permissions:
         common.extend(DFS(neighbors[0][0], permissions, graph))
         return common
     else:
-        return []
+        return common
+
+def BFS(root, permissions, graph):
+    common = []
+
+    if len(permissions) == 0 or root not in permissions or root in common:
+        return common
+
+    common.append(root)
+    permissions.remove(root)
+
+    nodes = [u for u,_ in nx.bfs_predecessors(graph, source=root, depth_limit=1)]
+    neighbors = sortNeighbor(root, nodes,permissions, graph)
+
+    '''
+    广度优先筛选符合条件的permissions
+    若满足条件，选取为common
+    否则， 跳过
+    '''
+    #print(neighbors)
+    for key, values in neighbors:
+        if freqPermission(graph.graph['name'], key) < 0.05 or weightProportion(root, key, graph) < 0.2:
+            break
+        elif key in permissions:
+            common.append(key)
+            permissions.remove(key)
+
+    for node in common[1:]:
+        common.extend(BFS(node, permissions, graph))
+
+    return common
+
+
+
+
+
+
+
+# sort the neighbor by degree of node and weight of edges
+def sortNeighbor(root, nodes, permissions, graph):
+    results = {}
+    for node in nodes:
+        if node in permissions:
+            results[node] = {'degree': graph.degree[root],
+                            'weight': graph.edges[root, node]['weight'],
+                            'count': graph.nodes[node]['count']}
+
+    results = sorted(results.items(), key=lambda x: (x[1]['count'], x[1]['weight'], x[1]['degree']), reverse=True)
+    return results
+
+
 
 
 
