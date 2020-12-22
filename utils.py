@@ -68,18 +68,6 @@ def searchCommon(graph):
     return result
 
 def DFS(root, permissions, graph):
-    # # sort the neighbor by degree of node and weight of edges
-    # def sortNeighbor(root, nodes):
-    #     results = {}
-    #     for node in nodes:
-    #         if node in permissions:
-    #             results[node] = {'degree': graph.degree[root],
-    #                              'weight': graph.edges[root, node]['weight'],
-    #                              'count': graph.nodes[node]['count']}
-    #
-    #     results = sorted(results.items(), key=lambda x: (x[1]['count'], x[1]['weight'], x[1]['degree']), reverse=True)
-    #     return results
-
 
     common = []
     common.append(root)
@@ -134,11 +122,6 @@ def BFS(root, permissions, graph):
     return common
 
 
-
-
-
-
-
 # sort the neighbor by degree of node and weight of edges
 def sortNeighbor(root, nodes, permissions, graph):
     results = {}
@@ -150,11 +133,3 @@ def sortNeighbor(root, nodes, permissions, graph):
 
     results = sorted(results.items(), key=lambda x: (x[1]['count'], x[1]['weight'], x[1]['degree']), reverse=True)
     return results
-
-
-
-
-
-
-
-
